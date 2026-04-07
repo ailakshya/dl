@@ -21,7 +21,7 @@ import cv2
 
 img   = cv2.imread("image.png")                                        # load image → NumPy array (H,W,3) BGR
 edges = cv2.Canny(cv2.cvtColor(img, cv2.COLOR_BGR2GRAY), 100, 200)    # grayscale → edge detection
-print("Pass!" if edges.max() > 0 else "Fail!")                         # test: at least one edge found
+assert edges.max() > 0                                                 # test: crash if no edges found
 cv2.imshow("Edges", edges); cv2.waitKey(0)                             # show result, wait for keypress
 ```
 
