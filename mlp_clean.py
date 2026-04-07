@@ -22,6 +22,10 @@ for epoch in range(1000):
 
 with torch.no_grad():
     out = model(X)
-    print("Predictions:", (out > 0.5).int().squeeze())
-    print("Targets:    ", y.squeeze().int())
+    preds = (out > 0.5).int().squeeze()
+    targets = y.squeeze().int()
+    accuracy = (preds == targets).float().mean().item() * 100
+    print("Predictions:", preds)
+    print("Targets:    ", targets)
     print(f"Final Loss: {loss.item():.4f}")
+    print(f"Accuracy:   {accuracy:.1f}%")
