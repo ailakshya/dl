@@ -1,121 +1,115 @@
-# Viva Preparation — Experiment 01: Introduction to Deep Learning and OpenCV
+# Viva — Experiment 01: Intro to Deep Learning & OpenCV
 
 ---
 
-## 1. What is OpenCV?
-**OpenCV** (Open Source Computer Vision Library) is a library used for image and video processing.
-- Written in C++, works with Python
-- Used for: reading images, filtering, edge detection, object detection, etc.
+## What is OpenCV?
+Open Source Computer Vision Library — processes images/videos as NumPy arrays. Used for filtering, edge detection, preprocessing for deep learning.
 
----
+## What is Deep Learning?
+Neural networks with many layers that **learn features automatically** from data (unlike OpenCV which uses hand-crafted algorithms).
 
-## 2. What is Deep Learning?
-Deep Learning is a subset of Machine Learning where **neural networks with many layers** learn patterns from data automatically.
-- Input → Hidden Layers → Output
-- Used for: image recognition, speech, NLP, etc.
-
----
-
-## 3. What does our code do? (Step by Step)
-
-### Step 1 — Create a test image
-```python
-img = np.zeros((300,300,3), dtype=np.uint8)
-cv2.circle(img, (150,150), 80, (255,255,255), -1)
 ```
-- `np.zeros` → creates a black canvas of size 300x300 with 3 color channels (BGR)
-- `cv2.circle` → draws a white filled circle at center (150,150) with radius 80
-
-### Step 2 — Convert to Grayscale
-```python
-cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+Raw Image → OpenCV (preprocess) → Deep Learning Model → Prediction
 ```
-- Converts 3-channel color image (BGR) → 1-channel grayscale
-- **Why?** Edge detection works on single-channel images
-
-### Step 3 — Edge Detection (Canny)
-```python
-cv2.Canny(gray, 100, 200)
-```
-- Finds edges by detecting sharp changes in pixel intensity
-- `100` = lower threshold, `200` = upper threshold
-- Pixels above 200 → strong edge, below 100 → not an edge, between → edge only if connected to a strong edge
-
-### Step 4 — Test
-```python
-assert edges.max() > 0
-```
-- Checks that at least one edge was detected
-- If no edges found, code crashes with AssertionError
 
 ---
 
-## 4. Key Concepts
+## Code Walkthrough
 
-### What is an image in OpenCV?
-- An image is a **NumPy array** of pixel values
-- Color image shape: `(height, width, 3)` — 3 channels: Blue, Green, Red
-- Grayscale shape: `(height, width)` — 1 channel, values 0–255
+```python
+import cv2
 
-### Why BGR and not RGB?
-- OpenCV uses **BGR** (Blue, Green, Red) by default — historical reason from its C++ origins
-
-### What is Canny Edge Detection?
-A 4-step process:
-1. **Gaussian Blur** — smooths image to remove noise
-2. **Gradient calculation** — finds intensity changes
-3. **Non-maximum suppression** — thins the edges
-4. **Hysteresis thresholding** — keeps strong edges, discards weak ones
-
-### What is a threshold?
-A cutoff value. Pixels above the threshold are kept, below are discarded.
+img   = cv2.imread("image.png")                                        # load image → NumPy array (H,W,3) BGR
+edges = cv2.Canny(cv2.cvtColor(img, cv2.COLOR_BGR2GRAY), 100, 200)    # grayscale → edge detection
+print("Pass!" if edges.max() > 0 else "Fail!")                         # test: at least one edge found
+cv2.imshow("Edges", edges); cv2.waitKey(0)                             # show result, wait for keypress
+```
 
 ---
 
-## 5. Possible Viva Questions & Answers
+## Functions
 
-**Q: What is the shape of a color image in OpenCV?**
-A: `(height, width, 3)` — 3 channels in BGR order.
+| Function | What it does |
+|---|---|
+| `cv2.imread(file)` | Reads image → NumPy array `(H,W,3)`, BGR order. Returns `None` if not found |
+| `cv2.cvtColor(img, code)` | Converts color space. `COLOR_BGR2GRAY` → single channel |
+| `cv2.Canny(img, t1, t2)` | Edge detection. `t1`=low threshold, `t2`=high threshold |
+| `cv2.imshow(name, img)` | Opens window to display image |
+| `cv2.waitKey(0)` | Waits for keypress (0 = forever). Keeps window open |
 
-**Q: Why do we convert to grayscale before edge detection?**
-A: Canny works on single-channel images. Grayscale reduces the 3 channels to 1, simplifying intensity comparison.
+---
 
-**Q: What do the two numbers in Canny (100, 200) mean?**
-A: Lower and upper thresholds. Values above 200 are strong edges, below 100 are discarded, between 100–200 are kept only if connected to a strong edge.
+## Canny — 4 Steps
+1. **Gaussian Blur** — removes noise
+2. **Sobel Gradient** — finds intensity changes (X & Y)
+3. **Non-max Suppression** — thins edges to 1px
+4. **Hysteresis Threshold** — above t2 = edge, below t1 = discard, between = edge if connected to strong edge
 
-**Q: What does `np.zeros` do?**
-A: Creates an array filled with zeros — a completely black image.
+---
 
-**Q: What is `dtype=np.uint8`?**
-A: Unsigned 8-bit integer — pixel values range from 0 (black) to 255 (white).
+## Image Shapes
 
-**Q: What is the difference between deep learning and OpenCV?**
-A: OpenCV uses hand-crafted algorithms (like Canny). Deep learning **learns** the features automatically from data using neural networks.
+| Type | Shape | Values |
+|---|---|---|
+| Color | `(H, W, 3)` | 0–255 per channel |
+| Grayscale | `(H, W)` | 0–255 |
+| Canny output | `(H, W)` | 0 or 255 |
 
-**Q: What is the role of OpenCV in deep learning?**
-A: OpenCV is used for **preprocessing** — reading, resizing, converting images before feeding them into a deep learning model.
+**Why BGR?** OpenCV's historical default (not RGB). Convert with `COLOR_BGR2RGB` for matplotlib.
 
-**Q: What does `assert` do?**
-A: Tests a condition. If it's False, it raises an `AssertionError` and stops the program — used for quick testing.
+---
+
+## Viva Q&A
+
+**Q: Why grayscale before Canny?**
+Canny needs single-channel. Grayscale removes color, keeps brightness (where edges are).
+
+**Q: What do Canny thresholds (100, 200) mean?**
+Above 200 = strong edge. Below 100 = not an edge. Between = edge only if connected to a strong edge. Rule: upper = 2× lower.
 
 **Q: What is `cv2.waitKey(0)`?**
-A: Waits indefinitely until a key is pressed before closing the image window.
+Waits indefinitely for a keypress — required to keep the imshow window open.
+
+**Q: OpenCV vs Deep Learning?**
+OpenCV = hand-crafted rules. Deep learning = learns features from data automatically.
+
+**Q: What does `assert edges.max() > 0` check?**
+That at least one edge pixel (255) was found. If all zeros, no edges detected — test fails.
 
 ---
 
-## 6. Key Terms to Remember
+## Key Line Explained
 
-| Term | Meaning |
+```python
+edges = cv2.Canny(cv2.cvtColor(img, cv2.COLOR_BGR2GRAY), 100, 200)
+```
+
+Two functions chained — inner runs first:
+
+**Step 1 — `cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)`**
+- Converts color image `(H,W,3)` → grayscale `(H,W)`
+- Formula: `gray = 0.114B + 0.587G + 0.299R`
+
+**Step 2 — `cv2.Canny(..., 100, 200)`**
+- Takes grayscale output, runs 4 steps: blur → gradient → thin → threshold
+- `100` = lower threshold, `200` = upper threshold
+- Output: 255 at edges, 0 elsewhere
+
+---
+
+## Where is Deep Learning in this code?
+
+**It's not.** This experiment is OpenCV only — hand-crafted algorithms, no learning.
+
+| This code | Deep Learning |
 |---|---|
-| Pixel | Smallest unit of an image |
-| Grayscale | Single-channel image (0=black, 255=white) |
-| BGR | Blue-Green-Red color format used by OpenCV |
-| Edge | Boundary between two regions of different intensity |
-| Threshold | Cutoff value to decide edge or not |
-| NumPy array | How images are stored in Python |
-| Canny | Algorithm to detect edges in an image |
+| Rules written by humans | Learns rules from data |
+| Canny = fixed math | CNN = learned filters |
+| Same output always | Improves with more data |
+
+Experiment 01 builds the image processing foundation. From Experiment 03 (CNNs) onwards, the model learns features automatically instead of using Canny manually.
 
 ---
 
-## 7. One-line Summary
-> OpenCV reads and processes images as NumPy arrays. We created a test image, converted it to grayscale, and applied Canny edge detection to find the boundaries of shapes.
+## One-liner
+> OpenCV loads images as NumPy arrays; Canny finds edges by detecting sharp intensity changes using a 4-step algorithm with double thresholding.

@@ -1,10 +1,6 @@
-import cv2, numpy as np
+import cv2
 
-img   = np.zeros((300,300,3), dtype=np.uint8)
-cv2.circle(img, (150,150), 80, (255,255,255), -1)
+img = cv2.imread("image.png")
 edges = cv2.Canny(cv2.cvtColor(img, cv2.COLOR_BGR2GRAY), 100, 200)
-
-assert edges.max() > 0
-print("Test passed!")
-
+print("Pass!" if edges.max() > 0 else "Fail!")
 cv2.imshow("Edges", edges); cv2.waitKey(0)
